@@ -57,6 +57,16 @@ enum Permission {
   PERMISSION_DENIED = 'denied',
 }
 
+interface ShowOptions {
+  title: string;
+  tag: string;
+  requireInteraction: boolean;
+  icon: string;
+  badge: string;
+  image: string;
+  body: string;
+}
+
 const notifications = {};
 
 export const useBrowserNotifications = (config: Config) => {
@@ -105,48 +115,53 @@ export const useBrowserNotifications = (config: Config) => {
     setWindowFocus(false);
   }, [debug]);
 
-  const showNotification = useCallback(async () => {
-    debug('Show Notification');
+  const showNotification = useCallback(
+    async (showOptions?: ShowOptions) => {
+      debug('Show Notification');
 
-    const notificationTag = _config.tag || `use-browser-notifications-${Date.now().toString().slice(4, -3)}`;
-    if (!_config.tag) {
-      setTag(notificationTag);
-    }
+      const notificationTag =
+        showOptions?.tag || _config.tag || `use-browser-notifications-${Date.now().toString().slice(4, -3)}`;
 
-    if (notifications[notificationTag]) {
-      return;
-    }
+      if (!_config.tag) {
+        setTag(notificationTag);
+      }
 
-    const notification = new window.Notification(title, {
-      tag: notificationTag,
-      vibrate: [200, 100, 200],
-      requireInteraction,
-      icon,
-      badge,
-      image,
-      body,
-    });
+      if (notifications[notificationTag]) {
+        return;
+      }
 
-    debug(`Notification created:
+      const notification = new window.Notification(title, {
+        tag: notificationTag,
+        vibrate: [200, 100, 200],
+        requireInteraction: showOptions?.requireInteraction || requireInteraction,
+        icon: showOptions?.icon || icon,
+        badge: showOptions?.badge || badge,
+        image: showOptions?.image || image,
+        body: showOptions?.body || body,
+      });
+
+      debug(`Notification created:
 
 ${JSON.stringify(notification, null, 2)}`);
 
-    notification.onshow = (event: Event) => {
-      onShow(event, notificationTag);
-    };
+      notification.onshow = (event: Event) => {
+        onShow(event, notificationTag);
+      };
 
-    notification.onclick = (event: Event) => {
-      onClick(event, notificationTag);
-    };
-    notification.onclose = (event: Event) => {
-      onClose(event, notificationTag);
-    };
-    notification.onerror = (err: any) => {
-      onError(err, notificationTag);
-    };
+      notification.onclick = (event: Event) => {
+        onClick(event, notificationTag);
+      };
+      notification.onclose = (event: Event) => {
+        onClose(event, notificationTag);
+      };
+      notification.onerror = (err: any) => {
+        onError(err, notificationTag);
+      };
 
-    notifications[notificationTag] = notification;
-  }, [_config.tag, badge, body, debug, icon, image, onClick, onClose, onError, onShow, requireInteraction, title]);
+      notifications[notificationTag] = notification;
+    },
+    [_config.tag, badge, body, debug, icon, image, onClick, onClose, onError, onShow, requireInteraction, title]
+  );
 
   const checkNotificationPromise = useCallback(async () => {
     let permission;
@@ -183,6 +198,29 @@ ${JSON.stringify(notification, null, 2)}`);
     return handlePermission(permission);
   }, [checkNotificationPromise, debug, granted, onPermissionDenied, onPermissionGranted]);
 
+  const enableNotifications = useCallback(async () => {
+    if (status === 'Enabled') {
+      debug('Browser notifications already enabled');
+      return;
+    }
+
+    debug('Trying to enabling browser notifications...');
+
+    if (!supported) {
+      debug('Browser notifications are not supported for this browser');
+      notSupported();
+      return;
+    }
+
+    if (status === 'Disabled' && supported) {
+      const permissionGranted = granted || (await askPermission());
+
+      if (permissionGranted) {
+        setStatus('Enabled');
+      }
+    }
+  }, [askPermission, debug, granted, status, supported, notSupported]);
+
   useEffect(() => {
     if (disableActiveWindow && status === 'Enabled') {
       window.addEventListener('focus', onWindowFocus);
@@ -205,37 +243,20 @@ ${JSON.stringify(notification, null, 2)}`);
     }
   }, []);
 
+  useEffect(() => {
+    enableNotifications();
+  }, [enableNotifications]);
+
   return {
-    enable: async () => {
-      if (status === 'Enabled') {
-        debug('Browser notifications already enabled');
-        return;
-      }
-
-      debug('Trying to enabling browser notifications...');
-
-      if (!supported) {
-        debug('Browser notifications are not supported for this browser');
-        notSupported();
-        return;
-      }
-
-      if (status === 'Disabled' && supported) {
-        const permissionGranted = granted || (await askPermission());
-
-        if (permissionGranted) {
-          setStatus('Enabled');
-        }
-      }
-    },
+    enable: enableNotifications,
     disableActiveWindow: (status: boolean) => {
       setDisableActiveWindow(status);
     },
-    show: () => {
+    show: (showOptions?: ShowOptions) => {
       const doNotShowOnActiveWindow = disableActiveWindow && windowFocus;
 
       if (granted && status === 'Enabled' && !doNotShowOnActiveWindow) {
-        showNotification();
+        showNotification(showOptions);
       } else {
         debug(`Cannot show a notification right now:
 
