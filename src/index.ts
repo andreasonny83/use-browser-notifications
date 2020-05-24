@@ -65,6 +65,10 @@ interface ShowOptions {
   badge: string;
   image: string;
   body: string;
+  onShow?: (event: Event, tag: string) => void;
+  onClick?: (event: Event, tag: string) => void;
+  onClose?: (event: Event, tag: string) => void;
+  onError?: (err: any, tag: string) => void;
 }
 
 const notifications = {};
@@ -145,17 +149,33 @@ export const useBrowserNotifications = (config: Config) => {
 ${JSON.stringify(notification, null, 2)}`);
 
       notification.onshow = (event: Event) => {
-        onShow(event, notificationTag);
+        if (showOptions?.onShow) {
+          showOptions.onShow(event, notificationTag);
+        } else {
+          onShow(event, notificationTag);
+        }
       };
 
       notification.onclick = (event: Event) => {
-        onClick(event, notificationTag);
+        if (showOptions?.onClick) {
+          showOptions.onClick(event, notificationTag);
+        } else {
+          onClick(event, notificationTag);
+        }
       };
       notification.onclose = (event: Event) => {
-        onClose(event, notificationTag);
+        if (showOptions?.onClose) {
+          showOptions.onClose(event, notificationTag);
+        } else {
+          onClose(event, notificationTag);
+        }
       };
       notification.onerror = (err: any) => {
-        onError(err, notificationTag);
+        if (showOptions?.onError) {
+          showOptions.onError(err, notificationTag);
+        } else {
+          onError(err, notificationTag);
+        }
       };
 
       notifications[notificationTag] = notification;
