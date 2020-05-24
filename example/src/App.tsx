@@ -4,8 +4,8 @@ import './App.css';
 
 function App() {
   const { enable, disableActiveWindow, show, getConfig } = useBrowserNotifications({
-    disableActiveWindow: true,
-    enabled: false,
+    // disableActiveWindow: true,
+    // enabled: false,
     debug: true,
     icon: 'https://raw.githubusercontent.com/Online-Memory/online-memory/master/packages/client/src/assets/img/WMC_icon.png',
     title: 'test notification',

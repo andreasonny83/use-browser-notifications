@@ -94,7 +94,7 @@ export const useBrowserNotifications = (config: Config) => {
   const [tag, setTag] = useState<string | undefined>(_config.tag);
   const [windowFocus, setWindowFocus] = useState<boolean>(true);
   const [disableActiveWindow, setDisableActiveWindow] = useState<boolean>(_config.disableActiveWindow);
-  const [status, setStatus] = useState<Status>(enabled ? 'Enabled' : 'Disabled');
+  const [status, setStatus] = useState<Status>('Disabled');
 
   const debug = useCallback(
     (message: string) => {
@@ -198,28 +198,35 @@ ${JSON.stringify(notification, null, 2)}`);
     return handlePermission(permission);
   }, [checkNotificationPromise, debug, granted, onPermissionDenied, onPermissionGranted]);
 
-  const enableNotifications = useCallback(async () => {
-    if (status === 'Enabled') {
-      debug('Browser notifications already enabled');
-      return;
-    }
-
-    debug('Trying to enabling browser notifications...');
-
-    if (!supported) {
-      debug('Browser notifications are not supported for this browser');
-      notSupported();
-      return;
-    }
-
-    if (status === 'Disabled' && supported) {
-      const permissionGranted = granted || (await askPermission());
-
-      if (permissionGranted) {
-        setStatus('Enabled');
+  const enableNotifications = useCallback(
+    async (forceEnable?: boolean) => {
+      if (!enabled && !forceEnable) {
+        return;
       }
-    }
-  }, [askPermission, debug, granted, status, supported, notSupported]);
+
+      if (status === 'Enabled') {
+        debug('Browser notifications already enabled');
+        return;
+      }
+
+      debug('Trying to enabling browser notifications...');
+
+      if (!supported) {
+        debug('Browser notifications are not supported for this browser');
+        notSupported();
+        return;
+      }
+
+      if (status === 'Disabled' && supported) {
+        const permissionGranted = granted || (await askPermission());
+
+        if (permissionGranted) {
+          setStatus('Enabled');
+        }
+      }
+    },
+    [askPermission, debug, granted, status, supported, notSupported]
+  );
 
   useEffect(() => {
     if (disableActiveWindow && status === 'Enabled') {
