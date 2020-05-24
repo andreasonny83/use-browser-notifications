@@ -13,7 +13,7 @@
     "node": ">=10"
   },
   "scripts": {
-    "postinstall": "cd example && yarn",
+    "prestart": "cd example && yarn",
     "prebuild": "rm -rf dist",
     "build": "microbundle-crl --no-compress --format modern,cjs",
     "start:dev": "microbundle-crl watch --no-compress --format modern,cjs",
