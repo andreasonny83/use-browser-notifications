@@ -116,7 +116,7 @@ export const useBrowserNotifications = (config: Config) => {
   }, [debug]);
 
   const showNotification = useCallback(
-    async (showOptions?: ShowOptions) => {
+    async (showOptions?: Partial<ShowOptions>) => {
       debug('Show Notification');
 
       const notificationTag =
@@ -252,7 +252,7 @@ ${JSON.stringify(notification, null, 2)}`);
     disableActiveWindow: (status: boolean) => {
       setDisableActiveWindow(status);
     },
-    show: (showOptions?: ShowOptions) => {
+    show: (showOptions?: Partial<ShowOptions>) => {
       const doNotShowOnActiveWindow = disableActiveWindow && windowFocus;
 
       if (granted && status === 'Enabled' && !doNotShowOnActiveWindow) {
