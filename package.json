@@ -1,6 +1,6 @@
 {
   "name": "use-browser-notifications",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "description": "React Hook for Browser Notifications",
   "author": "andreasonny83",
   "license": "MIT",
