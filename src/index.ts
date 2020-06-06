@@ -93,8 +93,9 @@ export const useBrowserNotifications = (config: Config) => {
     debug: isDebugEnabled,
   } = _config;
 
+  const initialGranted = 'Notification' in window && window.Notification.permission === Permission.PERMISSION_GRANTED;
   const [supported, setSupported] = useState<boolean>(false);
-  const [granted, setGranted] = useState<boolean>(window.Notification.permission === Permission.PERMISSION_GRANTED);
+  const [granted, setGranted] = useState<boolean>(initialGranted);
   const [tag, setTag] = useState<string | undefined>(_config.tag);
   const [windowFocus, setWindowFocus] = useState<boolean>(true);
   const [disableActiveWindow, setDisableActiveWindow] = useState<boolean>(_config.disableActiveWindow);
@@ -245,7 +246,7 @@ ${JSON.stringify(notification, null, 2)}`);
         }
       }
     },
-    [askPermission, debug, granted, status, supported, notSupported]
+    [askPermission, debug, enabled, granted, status, supported, notSupported]
   );
 
   useEffect(() => {
