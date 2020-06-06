@@ -49,16 +49,16 @@ export default App;
 
 ## Local development
 
-First install all the node dependencies using Yarn
+First install all the node dependencies using npm
 
 ```sh
-$ yarn
+$ npm install
 ```
 
 Then run the `start` script
 
 ```sh
-$ yarn start
+$ npm start
 ```
 
 ## License

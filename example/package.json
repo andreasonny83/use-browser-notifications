@@ -4,10 +4,10 @@
   "version": "0.0.0",
   "private": true,
   "dependencies": {
-    "react": "link:../node_modules/react",
-    "react-dom": "link:../node_modules/react-dom",
-    "react-scripts": "link:../node_modules/react-scripts",
-    "use-browser-notifications": "link:.."
+    "react": "file:../node_modules/react",
+    "react-dom": "file:../node_modules/react-dom",
+    "react-scripts": "file:../node_modules/react-scripts",
+    "use-browser-notifications": "file:.."
   },
   "scripts": {
     "start": "node ../node_modules/react-scripts/bin/react-scripts.js start",
